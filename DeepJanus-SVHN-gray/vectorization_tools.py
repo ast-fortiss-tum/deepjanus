@@ -30,7 +30,7 @@ def bitmap_count(image, threshold):
             count_b += 1
     #print("black"+str(count_b))
     #print("white"+str(count_w))
-    return count_w > count_b + 120
+    return count_w > count_b # + 120
 
 
 def preprocess(npdata):
@@ -39,19 +39,18 @@ def preprocess(npdata):
     # Pixel range is 0...255, 256/2 = 128
     import cv2
 
-    bw = cv2.equalizeHist(bw)
-    tshd, bw = cv2.threshold(bw, 128, 255, cv2.THRESH_OTSU)
+    # bw = cv2.equalizeHist(bw)
+    # tshd, bw = cv2.threshold(bw, 128, 255, cv2.THRESH_OTSU)
+    # bw = cv2.adaptiveThreshold(bw, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    tshd, bw = cv2.threshold(bw, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    if bitmap_count(bw, tshd):
-        #print("HERE")
+    # if bitmap_count(bw, tshd):
+    #     #print("HERE")
+    #     bw = 255 - bw
+    if np.mean(bw) > 128:
         bw = 255 - bw
-    #print(_)
-    #exit()
-    #bw[bw < 30] = 0  # Black
-    #bw[bw >= 30] = 255  # White
-    #bw[bw < 128] = 0  # Black
-    #bw[bw >= 128] = 255  # White
-    #print_bw(bw)
+        # print("INVERTED")
+
     # Normalization
     bw = bw / 255.0
     return bw
@@ -103,10 +102,6 @@ def vectorize(image):
         image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         #image = np.mean(image, axis=2)
     array = preprocess(image)
-    #array = preprocess_negative(image)
-    #if not np.any(array):
-    #    array = preprocess_negative(image)
-    #    print("HERE")
     # use Potrace lib to obtain a SVG path from a Bitmap
     # Create a bitmap from the array
     bmp = potrace.Bitmap(array)

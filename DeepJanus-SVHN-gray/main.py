@@ -57,7 +57,7 @@ def load_icse_data(confidence_is_100, label):
     # Convert list of images to a single 3D numpy array (matrix)
     x_test = np.array(images)
 
-    print(x_test.shape)
+    # print(x_test.shape)
     y_test = np.array([label] * len(x_test))
     return x_test, y_test
 
