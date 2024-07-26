@@ -9,12 +9,18 @@ import matplotlib.cm as cm
 
 
 from folder import Folder
-from config import IMG_SIZE, IMG_CHN
+from config import IMG_SIZE, IMG_CHN, EXPLABEL
 import numpy as np
 
-# load the MNIST dataset
-mnist = keras.datasets.mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+from predictor import Predictor
+import vectorization_tools
+import rasterization_tools
+import os
+import cv2
+
+# # load the MNIST dataset
+# mnist = keras.datasets.mnist
+# (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 
 def get_distance(v1, v2):
@@ -97,3 +103,65 @@ def set_all_seeds(seed):
     random.seed(seed)
     np.random.seed(seed)
     tf.keras.utils.set_random_seed(seed)
+
+
+def load_gray_data(confidence_is_100, label):
+    if confidence_is_100:
+        dataset_path = os.path.join("original_dataset/final-svhn-ices-10/svhn/100/", str(label))
+    else:
+        dataset_path = os.path.join("original_dataset/final-svhn-ices-10/svhn/not_100/", str(label))
+    # List all files in the directory
+    file_list = os.listdir(dataset_path)
+
+    image_files = [f for f in file_list if f.endswith('.png')]
+
+    # Initialize an empty list to store the images
+    images = []
+
+    # Load each image and append to the list
+    for image_file in image_files:
+        image_path = os.path.join(dataset_path, image_file)
+        # Load image in grayscale mode
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        if img is not None:
+            images.append(img)
+
+    # Convert list of images to a single 3D numpy array (matrix)
+    x_test = np.array(images)
+
+    # print(x_test.shape)
+    y_test = np.array([label] * len(x_test))
+    return x_test, y_test
+
+
+def check_label(x_test, y_test, explabel):
+    predictions, _ = (Predictor.predict(img=x_test, label=y_test))
+    predictions = np.array(predictions)
+
+    # drop labels that are not EXPLABEL
+    data_size = x_test.shape[0]
+
+    x_test = x_test[predictions == explabel]
+    y_test = y_test[predictions == explabel]
+
+    if data_size != x_test.shape[0]:
+        print("Dropped {} images with wrong label".format(data_size - x_test.shape[0]))
+    data_size = x_test.shape[0]
+    assert data_size != 0, "No data left"
+
+    # drop labels that are not EXPLABEL after rasterization
+    new_predictions = []
+    for img in x_test:
+        xml_desc = vectorization_tools.vectorize(img)
+        rasterized = rasterization_tools.rasterize_in_memory(xml_desc)
+        prediction_rasterized, _ = Predictor.predict_single(rasterized, explabel)
+        new_predictions.append(prediction_rasterized)
+
+    new_predictions = np.array(new_predictions)
+    x_test = x_test[np.where(new_predictions == explabel)]
+    y_test = y_test[np.where(new_predictions == explabel)]
+    if data_size != x_test.shape[0]:
+        print("Dropped {} images after rasterization".format(data_size - x_test.shape[0]))
+    assert x_test.shape[0] != 0, "No data left"
+
+    return x_test, y_test

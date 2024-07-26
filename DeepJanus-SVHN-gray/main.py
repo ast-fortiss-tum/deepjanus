@@ -10,7 +10,9 @@ from digit_mutator import DigitMutator
 
 from predictor import Predictor
 from timer import Timer
-from utils import print_archive, print_archive_experiment, set_all_seeds
+from utils import (print_archive, print_archive_experiment, set_all_seeds,
+                   load_gray_data, check_label)
+
 import archive_manager
 from individual import Individual
 from scipy.io import loadmat
@@ -29,54 +31,10 @@ set_all_seeds(seed=SEED)
 # y_test = hf.get('yn')
 # y_test = np.array(y_test)
 
-#
-import os
-import cv2
-
-def load_icse_data(confidence_is_100, label):
-    if confidence_is_100:
-        dataset_path = os.path.join("original_dataset/final-svhn-ices-10/svhn/100/", str(label))
-    else:
-        dataset_path = os.path.join("original_dataset/final-svhn-ices-10/svhn/not_100/", str(label))
-    # List all files in the directory
-    file_list = os.listdir(dataset_path)
-
-    image_files = [f for f in file_list if f.endswith('.png')]
-
-    # Initialize an empty list to store the images
-    images = []
-
-    # Load each image and append to the list
-    for image_file in image_files:
-        image_path = os.path.join(dataset_path, image_file)
-        # Load image in grayscale mode
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        if img is not None:
-            images.append(img)
-
-    # Convert list of images to a single 3D numpy array (matrix)
-    x_test = np.array(images)
-
-    # print(x_test.shape)
-    y_test = np.array([label] * len(x_test))
-    return x_test, y_test
-
-x_test, y_test = load_icse_data(confidence_100, EXPLABEL)
-
-#datasetLoc = '/home/vin/PycharmProjects/dola/DistributionAwareDNNTesting/SVHN_dx/dataset/test_32x32.mat'
-#test_data = loadmat(datasetLoc)
-#x_test = np.array(test_data['X'])
-# Normalize data.
-#x_test = np.moveaxis(x_test, -1, 0)
-
-#y_test = test_data['y']
-#y_test[y_test == 10] = 0
-#y_test = np.array(y_test)[:,]
-
-#y_test = y_test[np.where(y_test==EXPLABEL)]
-#x_test = x_test[np.where(y_test==EXPLABEL)]
-## TODO: check labels
-
+# Load the dataset.
+x_test, y_test = load_gray_data(confidence_100, EXPLABEL)
+# drop labels that are not EXPLABEL after rasterization
+x_test, y_test = check_label(x_test, y_test)
 
 # Fetch the starting seeds from file
 starting_seeds = [i for i in range(len(y_test))]
