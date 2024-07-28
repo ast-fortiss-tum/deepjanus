@@ -69,9 +69,12 @@ def print_archive_experiment(archive):
     for i, ind in enumerate(archive):
         digit = ind.m1
         digit.export(ind.id)
+        # print(f"m1 {ind.id}")
         digit = ind.m2
         digit.export(ind.id)
+        # print(f"m2 {ind.id}")
         ind.export()
+        # print("ind")
 
 
 # Useful function that shapes the input in the format accepted by the ML model.

@@ -70,8 +70,8 @@ class MnistMember:
     def export(self, ind_id):
         if not exists(Folder.DST_ARC):
             makedirs(Folder.DST_ARC)
-        dst = join(Folder.DST_ARC, "mbr" + str(ind_id))
-        #dst = join(Folder.DST_ARC, "mbr"+str(self.id))
+        # dst = join(Folder.DST_ARC, "mbr" + str(ind_id))  # ind_id is the same for two members
+        dst = join(Folder.DST_ARC, "mbr"+str(self.id))
         self.dump(dst, ind_id)
         self.save_npy(dst)
         self.save_png(dst)

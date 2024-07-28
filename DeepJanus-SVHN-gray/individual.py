@@ -90,3 +90,6 @@ class Individual:
 
         dist = mean([min(a, b), min(c, d), min(a, c), min(b, d)])
         return dist
+
+    def delete(self):
+        del self

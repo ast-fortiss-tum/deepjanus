@@ -47,12 +47,11 @@ class DigitMutator:
             counter += 1
             #print("mutation times", counter)
 
-            if counter_mutations > 100:
-                # show mutated image for debug
+            if counter % 500 == 0: #counter_mutations > 100:
+                # show mutated image for debug, it is not used
                 print("oroginal xml", self.digit.xml_desc)
                 print("---------------------------------------------------------")
                 print("mutant xml", mutant_xml_desc)
-
                 import tkinter
                 import matplotlib
                 matplotlib.use('TkAgg')
@@ -62,14 +61,23 @@ class DigitMutator:
                 plt.title(str(np.sum(self.digit.purified)))
                 plt.subplot(1, 2, 2)
                 plt.imshow(np.reshape(rasterized_digit, (32, 32)), cmap='gray')
-                plt.title(str(rasterized_digit))
+                plt.title(str(np.sum(rasterized_digit)))
                 plt.show()
+
+            if counter >= 200:
+                # discard the individual after 200 invalid mutations
+                print("mutation times", counter, "discard the individual")
+                distance_inputs = -1
+                condition = False
 
             if counter % 100 == 0:
                 # change config to avoid too many invalid mutation
                 mutation = 3-mutation
                 counter_mutations = 0
-                print("mutation times", counter, "reset the config")
+                print("mutation times", counter, "change the config")
+
+
+
 
         self.digit.xml_desc = mutant_xml_desc
         self.digit.purified = rasterized_digit

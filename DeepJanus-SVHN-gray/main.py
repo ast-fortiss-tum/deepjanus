@@ -17,10 +17,10 @@ import archive_manager
 from individual import Individual
 from scipy.io import loadmat
 from config import NGEN, \
-    POPSIZE, INITIALPOP, \
+    INITIALPOP, \
     RESEEDUPPERBOUND, GENERATE_ONE_ONLY, \
     STOP_CONDITION, STEPSIZE, DJ_DEBUG, EXPLABEL, \
-    IMG_SIZE, IMG_CHN, SEED, confidence_100
+    IMG_SIZE, IMG_CHN, SEED #POPSIZE,
 
 set_all_seeds(seed=SEED)
 # Original DJ method
@@ -31,10 +31,15 @@ set_all_seeds(seed=SEED)
 # y_test = hf.get('yn')
 # y_test = np.array(y_test)
 
-# Load the dataset.
-x_test, y_test = load_gray_data(confidence_100, EXPLABEL)
+# Load the dataset. Due to the small size of the dataset, we combine two folders with the same label
+x_test1, y_test1 = load_gray_data(confidence_is_100=False, label=EXPLABEL)
+x_test2, y_test2 = load_gray_data(confidence_is_100=True, label=EXPLABEL)
+x_test = np.concatenate([x_test1, x_test2], axis=0)
+y_test = np.concatenate([y_test1, y_test2], axis=0)
 # drop labels that are not EXPLABEL after rasterization
-x_test, y_test = check_label(x_test, y_test)
+x_test, y_test = check_label(x_test, y_test, EXPLABEL)
+POPSIZE = x_test.shape[0]
+assert POPSIZE >= 4, "No enough data"
 
 # Fetch the starting seeds from file
 starting_seeds = [i for i in range(len(y_test))]
@@ -53,7 +58,6 @@ toolbox = base.Toolbox()
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
 # Define the individual.
 creator.create("Individual", Individual, fitness=creator.FitnessMulti)
-
 
 def generate_digit(seed):
     seed_image = x_test[int(seed)]
@@ -119,8 +123,11 @@ def mutate_individual(individual):
         distance_inputs = DigitMutator(individual.m1).mutate(reference=individual.m2)
     else:
         distance_inputs = DigitMutator(individual.m2).mutate(reference=individual.m1)
-    individual.reset()
-    individual.members_distance = distance_inputs
+    if distance_inputs < 0:
+        individual.delete()
+    else:
+        individual.reset()
+        individual.members_distance = distance_inputs
 
 
 toolbox.register("individual", generate_individual)
@@ -169,7 +176,7 @@ def main(rand_seed=SEED):
 
     # Generate initial population.
     print("### Initializing population ....")
-    population = toolbox.population(n=POPSIZE)
+    population = toolbox.population(n= POPSIZE)
     # TODO: test digits
     # for ind in population:
     #    digit = ind.m1
@@ -208,7 +215,7 @@ def main(rand_seed=SEED):
     gen = 1
     while condition:
         # Vary the population.
-        offspring = tools.selTournamentDCD(population, 8) #len(population))
+        offspring = tools.selTournamentDCD(population, len(population)//4*4) #len(population))
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         # Reseeding

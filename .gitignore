@@ -2,3 +2,8 @@
 /DeepJanus-SVHN-gray/runs
 DeepJanus-SVHN-gray/temp_xc.py
 /DeepJanus-SVHN-gray/__pycache__
+/.jupyter
+/.ipynb_checkpoints
+/DeepJanus-SVHN-gray/.ipynb_checkpoints
+/DeepJanus-SVHN-gray/.ipynb_checkpoints
+/DeepJanus-MNIST/runs
