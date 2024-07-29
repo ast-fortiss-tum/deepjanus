@@ -24,6 +24,8 @@ class Individual:
         self.archive_candidate = None
         self.m1 = member1
         self.m2 = member2
+        self.original_image: str = ""
+
 
     def reset(self):
         self.id = Individual.COUNT
@@ -39,7 +41,8 @@ class Individual:
                 #TODO: expected label depending on member
                 'expected_label': str(EXPLABEL),
                 'm1': str(self.m1.id),
-                'm2': str(self.m2.id)
+                'm2': str(self.m2.id),
+                'original_image': self.original_image
         }
 
     def export(self):

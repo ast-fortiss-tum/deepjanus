@@ -97,6 +97,8 @@ class Individual:
         del self
 
     def valid(self):
+        # In SVHN, there is a behaviour that slight changes in svg result in completely different images.
+        # To avoid this, a large distance between members should be avoided
         if 0 < self.members_distance < 10:
             return True
         else:

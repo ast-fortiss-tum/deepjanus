@@ -10,20 +10,34 @@ from digit_mutator import DigitMutator
 
 from predictor import Predictor
 from timer import Timer
-from utils import print_archive, print_archive_experiment
+from utils import print_archive, print_archive_experiment, set_all_seeds, load_data, load_icse_data, check_label
 import archive_manager
 from individual import Individual
 from config import NGEN, \
     POPSIZE, INITIALPOP, \
     RESEEDUPPERBOUND, GENERATE_ONE_ONLY, DATASET, \
-    STOP_CONDITION, STEPSIZE, DJ_DEBUG
+    STOP_CONDITION, STEPSIZE, DJ_DEBUG, SEED, EXPLABEL, DATALOADER
 
-# Load the dataset.
-hf = h5py.File(DATASET, 'r')
-x_test = hf.get('xn')
-x_test = np.array(x_test)
-y_test = hf.get('yn')
-y_test = np.array(y_test)
+set_all_seeds(seed=SEED)
+
+
+if DATALOADER == 'normal':
+    # original data
+    (x_test, y_test) = load_data()
+elif DATALOADER == 'mimicry':
+    # icse data as baseline
+    x_test1, y_test1, image_files1 = load_icse_data(confidence_is_100=True, label=EXPLABEL)
+    x_test2, y_test2, image_files2 = load_icse_data(confidence_is_100=False, label=EXPLABEL)
+    x_test = np.concatenate([x_test1, x_test2], axis=0)
+    y_test = np.concatenate([y_test1, y_test2], axis=0)
+    image_files = np.concatenate([image_files1, image_files2], axis=0)
+
+    x_test, y_test, image_files = check_label(x_test, y_test, image_files, EXPLABEL)
+
+    POPSIZE = x_test.shape[0]
+    assert POPSIZE >= 4, "No enough data"
+else:
+    raise NotImplementedError
 
 # Fetch the starting seeds from file
 starting_seeds = [i for i in range(len(y_test))]
@@ -58,6 +72,7 @@ def ind_from_seed(seed):
     individual = creator.Individual(digit1, digit2)
     individual.members_distance = distance_inputs
     individual.seed = seed
+    individual.original_image = image_files[int(seed)]
     return individual
 
 
@@ -184,7 +199,8 @@ def main(rand_seed=None):
     gen = 1
     while condition:
         # Vary the population.
-        offspring = tools.selTournamentDCD(population, len(population))
+        # offspring = tools.selTournamentDCD(population, len(population))
+        offspring = tools.selTournamentDCD(population, k=len(population)//4*4) # k must be divisible by four
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         # Reseeding

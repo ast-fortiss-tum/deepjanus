@@ -3,10 +3,14 @@ DJ_DEBUG = 1
 # GA Setup
 POPSIZE = 100
 
+DATALOADER = 'mimicry' # 'normal' or 'mimicry'
+
 STOP_CONDITION = "iter"
 #STOP_CONDITION = "time"
 
-NGEN = 100
+SEED = 0
+
+NGEN = 500
 RUNTIME = 3600
 STEPSIZE = 10
 # Mutation Hyperparameters
