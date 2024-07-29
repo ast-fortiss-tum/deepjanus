@@ -32,12 +32,14 @@ set_all_seeds(seed=SEED)
 # y_test = np.array(y_test)
 
 # Load the dataset. Due to the small size of the dataset, we combine two folders with the same label
-x_test1, y_test1 = load_gray_data(confidence_is_100=False, label=EXPLABEL)
-x_test2, y_test2 = load_gray_data(confidence_is_100=True, label=EXPLABEL)
+x_test1, y_test1, image_files1 = load_gray_data(confidence_is_100=False, label=EXPLABEL)
+x_test2, y_test2, image_files2 = load_gray_data(confidence_is_100=True, label=EXPLABEL)
 x_test = np.concatenate([x_test1, x_test2], axis=0)
 y_test = np.concatenate([y_test1, y_test2], axis=0)
+image_files = np.concatenate([image_files1, image_files2], axis=0)
 # drop labels that are not EXPLABEL after rasterization
-x_test, y_test = check_label(x_test, y_test, EXPLABEL)
+x_test, y_test, image_files = check_label(x_test, y_test, image_files, EXPLABEL)
+
 POPSIZE = x_test.shape[0]
 assert POPSIZE >= 4, "No enough data"
 
@@ -80,6 +82,7 @@ def ind_from_seed(seed):
     individual = creator.Individual(digit1, digit2)
     individual.members_distance = distance_inputs
     individual.seed = seed
+    individual.original_image = image_files[int(seed)]
     return individual
 
 

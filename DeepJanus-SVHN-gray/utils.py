@@ -17,6 +17,7 @@ import vectorization_tools
 import rasterization_tools
 import os
 import cv2
+import glob
 
 # # load the MNIST dataset
 # mnist = keras.datasets.mnist
@@ -114,16 +115,13 @@ def load_gray_data(confidence_is_100, label):
     else:
         dataset_path = os.path.join("original_dataset/final-svhn-ices-10/svhn/not_100/", str(label))
     # List all files in the directory
-    file_list = os.listdir(dataset_path)
-
-    image_files = [f for f in file_list if f.endswith('.png')]
-
+    image_files = glob.glob(dataset_path + '/*.png')
+    image_files = sorted(image_files, key=lambda x: int(x.split('/')[-1].split('.')[0]))
     # Initialize an empty list to store the images
     images = []
 
     # Load each image and append to the list
-    for image_file in image_files:
-        image_path = os.path.join(dataset_path, image_file)
+    for image_path in image_files:
         # Load image in grayscale mode
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         if img is not None:
@@ -134,10 +132,10 @@ def load_gray_data(confidence_is_100, label):
 
     # print(x_test.shape)
     y_test = np.array([label] * len(x_test))
-    return x_test, y_test
+    return x_test, y_test, image_files
 
 
-def check_label(x_test, y_test, explabel):
+def check_label(x_test, y_test, image_files, explabel):
     predictions, _ = (Predictor.predict(img=x_test, label=y_test))
     predictions = np.array(predictions)
 
@@ -146,6 +144,7 @@ def check_label(x_test, y_test, explabel):
 
     x_test = x_test[predictions == explabel]
     y_test = y_test[predictions == explabel]
+    image_files = image_files[predictions == explabel]
 
     if data_size != x_test.shape[0]:
         print("Dropped {} images with wrong label".format(data_size - x_test.shape[0]))
@@ -163,8 +162,10 @@ def check_label(x_test, y_test, explabel):
     new_predictions = np.array(new_predictions)
     x_test = x_test[np.where(new_predictions == explabel)]
     y_test = y_test[np.where(new_predictions == explabel)]
+    image_files = image_files[np.where(new_predictions == explabel)]
+
     if data_size != x_test.shape[0]:
         print("Dropped {} images after rasterization".format(data_size - x_test.shape[0]))
     assert x_test.shape[0] != 0, "No data left"
 
-    return x_test, y_test
+    return x_test, y_test, image_files
