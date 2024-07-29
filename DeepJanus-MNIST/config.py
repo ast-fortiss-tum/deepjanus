@@ -39,7 +39,6 @@ MUTOFPROB = 0.5
 IMG_SIZE = 28
 num_classes = 10
 
-
 INITIALPOP = 'seeded'
 
 GENERATE_ONE_ONLY = False
