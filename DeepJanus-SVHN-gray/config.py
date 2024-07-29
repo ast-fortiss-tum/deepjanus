@@ -6,9 +6,9 @@ POPSIZE = 10
 STOP_CONDITION = "iter"
 #STOP_CONDITION = "time"
 
-SEED = 2
+SEED = 9
 
-NGEN = 500
+NGEN = 2000
 #NGEN = 100
 RUNTIME = 3600
 STEPSIZE = 10
@@ -54,7 +54,7 @@ GENERATE_ONE_ONLY = False
 RESULTS_PATH = 'results'
 REPORT_NAME = 'stats.csv'
 # DATASET = 'original_dataset/janus_dataset_comparison.h5'
-EXPLABEL = 0
+EXPLABEL = 9
 #TODO: set interpreter
 INTERPRETER = '/home/vin/yes/envs/tf_gpu/bin/python'
 confidence_100 = False

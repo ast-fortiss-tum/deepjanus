@@ -1,0 +1,12 @@
+{
+    "K": "0.1",
+    "archive tshd": "1.5",
+    "budget": "2000",
+    "budget_type": "iter",
+    "confidence_100": "False",
+    "label": "0",
+    "mut low": "0.01",
+    "mut up": "0.6",
+    "popsize": "10",
+    "reseed": "10"
+}
