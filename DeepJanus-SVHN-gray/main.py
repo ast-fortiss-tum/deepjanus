@@ -126,12 +126,23 @@ def mutate_individual(individual):
         distance_inputs = DigitMutator(individual.m1).mutate(reference=individual.m2)
     else:
         distance_inputs = DigitMutator(individual.m2).mutate(reference=individual.m1)
-    if distance_inputs < 0:
-        individual.delete()
-    else:
-        individual.reset()
-        individual.members_distance = distance_inputs
+    # if distance_inputs < 0:
+    #     individual.delete()
+    #     print("Individual deleted }")
+    # else:
+    individual.reset()
+    individual.members_distance = distance_inputs
 
+
+def filter_invalid(population):
+    valid_population = [ind for ind in population if ind.valid()]
+    # while len(valid_population) < len(population):
+    #     new_ind = toolbox.individual()
+    #     if is_valid(new_ind):
+    #         valid_population.append(new_ind)
+    if len(valid_population) < len(population):
+        print("Discard Invalid population: ", len(population) - len(valid_population))
+    return valid_population
 
 toolbox.register("individual", generate_individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -249,8 +260,9 @@ def main(rand_seed=SEED):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
+        # Update archive with the individuals on the decision boundary.
         for ind in population + offspring:
-            if ind.archive_candidate:
+            if ind.archive_candidate and ind.valid(): # some archive candidates are not valid with SVHN
                 archive.update_archive(ind)
 
         # Select the next generation population
@@ -271,6 +283,8 @@ def main(rand_seed=SEED):
         elif STOP_CONDITION == "time":
             if not Timer.has_budget():
                 condition = False
+
+        population = filter_invalid(population)
 
     archive.create_report(x_test, Individual.SEEDS, gen)
     print(logbook.stream)

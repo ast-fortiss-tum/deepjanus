@@ -54,7 +54,7 @@ GENERATE_ONE_ONLY = False
 RESULTS_PATH = 'results'
 REPORT_NAME = 'stats.csv'
 # DATASET = 'original_dataset/janus_dataset_comparison.h5'
-EXPLABEL = 9
+EXPLABEL = 8
 #TODO: set interpreter
 INTERPRETER = '/home/vin/yes/envs/tf_gpu/bin/python'
 confidence_100 = False

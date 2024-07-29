@@ -95,3 +95,9 @@ class Individual:
 
     def delete(self):
         del self
+
+    def valid(self):
+        if 0 < self.members_distance < 10:
+            return True
+        else:
+            return False

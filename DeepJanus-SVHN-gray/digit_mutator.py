@@ -85,6 +85,10 @@ class DigitMutator:
         self.digit.confidence = None
         self.digit.correctly_classified = None
 
+        if distance_inputs > 10:
+            print("distance_inputs", distance_inputs)
+            # discard the individual with large distance
+            distance_inputs = -1
         return distance_inputs
 
     def generate(self):
@@ -124,5 +128,3 @@ class DigitMutator:
         first_digit.purified = rasterized_digit1
         second_digit.purified = rasterized_digit2
         return first_digit, second_digit, distance_inputs
-
-
